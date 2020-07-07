@@ -13,7 +13,15 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::get('/login', 'Auth\LoginController@authenticate');
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['middleware' => ['auth:api']], function () {
+    Route::get('/logout', 'Auth\LoginController@logout');
+
+    Route::resource('cliente', 'ClienteController');
+    Route::resource('empleado', 'EmpleadoController');
+    Route::resource('locacion', 'LocacionController');
+    Route::resource('horario_laboral', 'HorarioLaboralController');
+
+    Route::get('cliente-test', 'ClienteController@test');
 });

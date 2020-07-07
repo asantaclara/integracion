@@ -28,7 +28,7 @@ class CreateEmpleadosTable extends Migration
                 'CI Policia Federal',
                 'Certificado de Migracion'
             ]);
-            $table->integer('documento');
+            $table->string('documento',11);
             $table->string('direccion', 255);
             $table->string('telefono', 255);
             $table->enum('nacionalidad', [

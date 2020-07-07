@@ -15,7 +15,7 @@ class CreateClientesTable extends Migration
     {
         Schema::create('cliente', function (Blueprint $table) {
             $table->id();
-            $table->integer('cuit_cuil');
+            $table->string('cuit_cuil',11);
             $table->enum('tipo_categoria', [
                 'IVA Responsable Inscripto',
                 'IVA Sujeto Excento',

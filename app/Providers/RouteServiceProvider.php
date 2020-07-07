@@ -21,7 +21,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    public const HOME = '/home';
+    public const HOME = 'https://integracion-aplicaciones-uade.herokuapp.com/';
 
     /**
      * Define your route model bindings, pattern filters, etc.

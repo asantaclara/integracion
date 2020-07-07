@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Cliente;
+use App\Http\Requests\ClienteFormRequest;
+use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class ClienteController extends Controller
 {
@@ -14,7 +18,7 @@ class ClienteController extends Controller
      */
     public function index()
     {
-        //
+        return Cliente::all();
     }
 
     /**
@@ -24,18 +28,39 @@ class ClienteController extends Controller
      */
     public function create()
     {
-        //
+
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'cuit_cuil' => 'digits_between:10,11|required',
+            'tipo_categoria' => 'required|in:IVA Responsable Inscripto,IVA Sujeto Excento,Consumidor Final,Responsable Monotributo',
+            'tipo_cliente' => 'required|in:P. Fisica,P. Juridica',
+            'forma_pago_habitual' => 'required|in:Contado,TC,TD,Cuentacorriente',
+            'direccion' => 'required',
+            'nombre_razon_social' => 'required',
+            'email' => 'required|email',
+            'telefono' => 'required',
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
+        }
+        try {
+            $request = $request->all();
+            unset($request['api_token']);
+            $cliente = new Cliente($request);
+            $cliente->save();
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
+        }
+        return response()->json(['success' => 'success', 'cliente' => $cliente],200);
     }
 
     /**
@@ -65,11 +90,30 @@ class ClienteController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Cliente  $cliente
-     * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Cliente $cliente)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'cuit_cuil' => 'digits_between:10,11',
+            'tipo_categoria' => 'in:IVA Responsable Inscripto,IVA Sujeto Excento,Consumidor Final,Responsable Monotributo',
+            'tipo_cliente' => 'in:P. Fisica,P. Juridica',
+            'forma_pago_habitual' => 'in:Contado,TC,TD,Cuentacorriente',
+            'email' => 'email',
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
+        }
+
+        try{
+            $request = $request->all();
+            unset($request['api_token']);
+            $cliente->update($request);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
+        }
+
+        return response()->json(['success' => 'success', 'cliente' => $cliente],200);
     }
 
     /**
