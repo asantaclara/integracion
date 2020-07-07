@@ -13,8 +13,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//Route::get('/', function () {
-//    return view('welcome');
-//});
+Route::get('/login', function () {
+    return response()->json(['error' => 'Forbidden', 'message' => 'wrong credentials'],401);
+})->name('login');
+
 //Auth::routes();
 //Route::get('/home', 'HomeController@index')->name('home');
+//Route::get('/login', 'HomeController@index');
