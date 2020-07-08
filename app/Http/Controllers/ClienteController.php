@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Cliente;
+use App\Services\ClienteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -12,9 +13,16 @@ class ClienteController extends Controller
      * Display a listing of the resource.
      *
      */
+    private $clienteService;
+
+    public function __construct(ClienteService $clienteService)
+    {
+        $this->clienteService = $clienteService;
+    }
+
     public function index()
     {
-        return Cliente::all();
+        return $this->clienteService->all();
     }
 
     /**
@@ -50,7 +58,7 @@ class ClienteController extends Controller
             'direccion' => 'required',
             'nombre_razon_social' => 'required',
             'email' => 'required|email',
-            'telefono' => 'required',
+            'telefono' => 'regex:/[\d\-\/]+/|required',
         ]);
         if($validator->fails()){
             return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
@@ -58,8 +66,8 @@ class ClienteController extends Controller
         try {
             $request = $request->all();
             unset($request['api_token']);
-            $cliente = new Cliente($request);
-            $cliente->save();
+            unset($request['id']);
+            $cliente = $this->clienteService->create($request);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
         }
@@ -88,6 +96,7 @@ class ClienteController extends Controller
     public function edit(Cliente $cliente)
     {
         return [
+            'id',
             'cuit_cuil',
             'tipo_categoria',
             'tipo_cliente',
@@ -120,7 +129,8 @@ class ClienteController extends Controller
         try{
             $request = $request->all();
             unset($request['api_token']);
-            $cliente->update($request);
+            unset($request['id']);
+           $cliente = $this->clienteService->update($cliente,$request);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
         }

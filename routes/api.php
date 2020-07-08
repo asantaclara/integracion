@@ -19,9 +19,12 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('/logout', 'Auth\LoginController@logout');
 
     Route::resource('cliente', 'ClienteController');
-    Route::resource('empleado', 'EmpleadoController');
     Route::resource('locacion', 'LocacionController');
     Route::resource('horario_laboral', 'HorarioLaboralController');
+
+    Route::resource('empleado', 'EmpleadoController');
+    Route::post('asignar-locacion-a-empleado', 'EmpleadoController@asignarLocacionAEmpleado');
+    Route::post('asignar-horario-laboral-a-empleados', 'HorarioLaboralController@asignarHorarioLaboralAEmpleados');
 
     Route::get('cliente-test', 'ClienteController@test');
 });

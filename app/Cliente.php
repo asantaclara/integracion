@@ -17,4 +17,9 @@ class Cliente extends Model
         'email',
         'telefono'
     ];
+
+    public function locaciones()
+    {
+        return $this->hasMany('App\Locacion','cliente_id');
+    }
 }

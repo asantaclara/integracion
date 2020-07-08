@@ -15,10 +15,10 @@ class CreateEmpleadoLocacionesTable extends Migration
     {
         Schema::create('empleado_locacion', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cliente_id')->constrained('cliente');
+            $table->foreignId('empleado_id')->constrained('empleado');
             $table->foreignId('locacion_id')->constrained('locacion');
             $table->date('fecha_vinculacion');
-            $table->date('fecha_desvinculacion');
+            $table->date('fecha_desvinculacion')->nullable()->default(null);
             $table->timestamps();
         });
     }

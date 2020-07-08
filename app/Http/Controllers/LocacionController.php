@@ -3,11 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Locacion;
+use App\Services\LocacionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class LocacionController extends Controller
 {
+    private $locacionService;
+
+    public function __construct(LocacionService $locacionService)
+    {
+        $this->locacionService = $locacionService;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -48,12 +55,11 @@ class LocacionController extends Controller
         try {
             $request = $request->all();
             unset($request['api_token']);
-            $locacion = new Locacion($request);
-            $locacion->save();
+            $locacion = $this->locacionService->create($request);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
         }
-        return response()->json(['success' => 'success', 'cliente' => $locacion],200);
+        return response()->json(['success' => 'success', 'locacion' => $locacion],200);
     }
 
     /**
@@ -102,7 +108,7 @@ class LocacionController extends Controller
         try{
             $request = $request->all();
             unset($request['api_token']);
-            $locacion->update($request);
+            $locacion = $this->locacionService->update($locacion, $request);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
         }

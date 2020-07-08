@@ -7,6 +7,7 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class LoginController extends Controller
@@ -43,6 +44,13 @@ class LoginController extends Controller
 
     public function authenticate(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'password' => 'required',
+            'email' => 'required|email',
+        ]);
+        if($validator->fails()){
+            return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
+        }
         $credentials = $request->only('email', 'password');
         $credentials['activo'] = 1;
         if (Auth::attempt($credentials, true)) {
