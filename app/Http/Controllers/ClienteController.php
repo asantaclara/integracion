@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Cliente;
 use App\Services\ClienteService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class ClienteController extends Controller
@@ -22,6 +23,10 @@ class ClienteController extends Controller
 
     public function index()
     {
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         return $this->clienteService->all();
     }
 
@@ -31,6 +36,10 @@ class ClienteController extends Controller
      */
     public function create()
     {
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         return [
             'cuit_cuil',
             'tipo_categoria',
@@ -50,6 +59,10 @@ class ClienteController extends Controller
      */
     public function store(Request $request)
     {
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         $validator = Validator::make($request->all(), [
             'cuit_cuil' => 'digits_between:10,11|required',
             'tipo_categoria' => 'required|in:IVA Responsable Inscripto,IVA Sujeto Excento,Consumidor Final,Responsable Monotributo',
@@ -81,6 +94,10 @@ class ClienteController extends Controller
      */
     public function show(Cliente $cliente)
     {
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         if($cliente) {
             return response()->json(['success' => 'success', 'cliente' => $cliente],200);
         } else {
@@ -95,6 +112,10 @@ class ClienteController extends Controller
      */
     public function edit(Cliente $cliente)
     {
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         return [
             'id',
             'cuit_cuil',
@@ -116,6 +137,10 @@ class ClienteController extends Controller
      */
     public function update(Request $request, Cliente $cliente)
     {
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         $validator = Validator::make($request->all(), [
             'cuit_cuil' => 'digits_between:10,11',
             'tipo_categoria' => 'in:IVA Responsable Inscripto,IVA Sujeto Excento,Consumidor Final,Responsable Monotributo',

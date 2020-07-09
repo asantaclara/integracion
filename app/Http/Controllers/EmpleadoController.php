@@ -3,37 +3,47 @@
 namespace App\Http\Controllers;
 
 use App\Empleado;
+use App\Locacion;
 use App\Services\EmpleadoService;
+use App\Services\LocacionService;
 use Carbon\Carbon;
 use Carbon\Exceptions\Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class EmpleadoController extends Controller
 {
     private $empleadoService;
+    private $locacionService;
 
-    public function __construct(EmpleadoService $empleadoService)
+    public function __construct(EmpleadoService $empleadoService, LocacionService $locacionService)
     {
         $this->empleadoService = $empleadoService;
+        $this->locacionService = $locacionService;
     }
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        return $this->empleadoService->all();
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Cliente'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+        return $this->empleadoService->all($user);
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
      */
     public function create()
     {
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
         return [
             'nombre',
             'legajo',
@@ -54,16 +64,20 @@ class EmpleadoController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Cliente'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         $validator = Validator::make($request->all(), [
             'nombre' => 'required',
             'legajo' => 'required',
             'tipo_documento' => 'required|in:CUIT,CDI,LE,LC,CI Extranjera,Dni,Pasaporte,CI Policia Federal,Certificado de Migracion',
-            'documento' => 'required|numeric',
+            'documento' => 'required|numeric|digits_between:7,8',
             'direccion' => 'required',
-            'telefono' => 'regex:/[\d\-\/]+/|required',
+            'telefono' => 'numeric|required',
             'nacionalidad' => 'required|in:Argentina,Bolivia,Brasil,Chile,Paraguay,Uruguay,Otra',
             'genero' => 'required|in:Hombre,Mujer,Otro',
-            'cliente_id' => 'required|exists:cliente,id'
         ]);
         if($validator->fails()){
             return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
@@ -72,6 +86,8 @@ class EmpleadoController extends Controller
             $request = $request->all();
             unset($request['api_token']);
             unset($request['id']);
+            unset($request['cliente_id']);
+            $request['cliente_id'] = $user->cliente->id;
             $empleado = $this->empleadoService->create($request);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
@@ -86,6 +102,11 @@ class EmpleadoController extends Controller
      */
     public function show(Empleado $empleado)
     {
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Cliente'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         if($empleado) {
             return response()->json(['success' => 'success', 'empleado' => $empleado],200);
         } else {
@@ -100,6 +121,11 @@ class EmpleadoController extends Controller
      */
     public function edit(Empleado $empleado)
     {
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Cliente'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         return [
             'id',
             'nombre',
@@ -122,13 +148,22 @@ class EmpleadoController extends Controller
      */
     public function update(Request $request, Empleado $empleado)
     {
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Cliente'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
+        if($empleado->cliente_id != $user->cliente->id) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'El empleado no pertenece al cliente'],401);
+        }
+
         $validator = Validator::make($request->all(), [
             'tipo_documento' => 'in:CUIT,CDI,LE,LC,CI Extranjera,Dni,Pasaporte,CI Policia Federal,Certificado de Migracion',
             'documento' => 'numeric',
-            'telefono' => 'regex:/[\d\-\/]+/',
+            'telefono' => 'numeric',
             'nacionalidad' => 'in:Argentina,Bolivia,Brasil,Chile,Paraguay,Uruguay,Otra',
             'genero' => 'in:Hombre,Mujer,Otro',
-            'cliente_id' => 'exists:cliente,id'
+            'cliente_id' => 'in:'.$user->cliente->id
         ]);
         if($validator->fails()){
             return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
@@ -155,28 +190,22 @@ class EmpleadoController extends Controller
         //
     }
 
-    public function asignarLocacionAEmpleado(Request $request)
+    public function empleadosDeLocacion(Locacion $locacion)
     {
-        $validator = Validator::make($request->all(), [
-            'empleado_id' => 'required|exists:empleado,id',
-            'locacion_id' => 'required|exists:locacion,id',
-            'fecha_vinculacion' => 'date',
-            'fecha_desvinculacion' => 'date|after_or_equal:fecha_vinculacion'
-        ]);
-        if($validator->fails()){
-            return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Cliente'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
         }
-        try{
-            $request = $request->all();
-            unset($request['api_token']);
-            if(!isset($request['fecha_vinculacion'])) {
-                $request['fecha_vinculacion'] = Carbon::now();
-            }
-            $empleadoLocacion = $this->empleadoService->asignarLocacion($request);
+
+        if($locacion->cliente != $user->cliente){
+            return response()->json(['error' => 'Forbidden', 'message' => 'La locacion no pertenece al cliente'],401);
+        }
+
+
+        try {
+            return $this->locacionService->empleadosDeLocacion($locacion);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
         }
-        return response()->json(['success' => 'success', 'empleadoLocacion' => $empleadoLocacion],200);
     }
-
 }

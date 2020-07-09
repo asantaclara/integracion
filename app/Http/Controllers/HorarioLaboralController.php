@@ -7,6 +7,7 @@ use App\Horario_Laboral;
 use App\Locacion;
 use App\Services\HorarioLaboralService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class HorarioLaboralController extends Controller
@@ -95,18 +96,16 @@ class HorarioLaboralController extends Controller
 
     public function asignarHorarioLaboralAEmpleados(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'cliente_id' => 'required|exists:cliente,id'
-            ]);
-        if($validator->validate()){
-            $clienteId = $request['cliente_id'];
-            $validator = Validator::make($request->all(), [
-                'locacion_id' => 'required|exists:locacion,id,cliente_id,'.$clienteId,
-                'empleados_id'   => 'required|array',
-                'empleados_id.*' => 'exists:empleado,id,cliente_id,'.$clienteId,
-                //TODO seguir cargando las validaciones, faltan las horas y despues ver como se asignan los horarios.
-            ]);
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Cliente'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
         }
+        $clienteId = $user->cliente->id;
+        $validator = Validator::make($request->all(), [
+            'locacion_id' => 'required|exists:locacion,id,cliente_id,'.$clienteId,
+            'empleados_id'   => 'required|array',
+            //TODO seguir cargando las validaciones, faltan las horas y despues ver como se asignan los horarios.
+        ]);
         if($validator->fails()){
             return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
         }

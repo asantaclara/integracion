@@ -61,7 +61,8 @@ class LoginController extends Controller
             return response()->json([[
                 'success' => 'success',
                 'api_token' => $user->api_token,
-                'role'=> $user->rol],
+                'role'=> $user->rol,
+                'name' => $user->name],
                 200]);
         } else {
             return response()->json(['error' => 'Forbidden'],403);

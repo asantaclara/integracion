@@ -2,12 +2,15 @@
 
 namespace App\Repositories;
 
-use App\empleado;
+use App\Empleado;
 
 class EmpleadoRepository
 {
-    public function all()
+    public function all($clienteId = null)
     {
+        if($clienteId){
+            return Empleado::where('cliente_id',$clienteId)->get();
+        }
         return Empleado::all();
     }
 

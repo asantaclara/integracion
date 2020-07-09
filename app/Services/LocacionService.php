@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\Cliente;
+use App\Empleado;
 use App\Locacion;
 use App\Repositories\LocacionRepository;
+use Prophecy\Exception\Prophecy\MethodProphecyException;
 
 class LocacionService
 {
@@ -13,9 +16,13 @@ class LocacionService
     {
         $this->locacionRepository = $locacionRepository;
     }
-    public function all()
+    public function all($user)
     {
-        return $this->locacionRepository->all();
+        $clienteId = null;
+        if($user->rol == 'Cliente') {
+            $clienteId = $user->cliente->id;
+        }
+        return $this->locacionRepository->all($clienteId);
     }
 
     public function create($data)
@@ -26,5 +33,10 @@ class LocacionService
     public function update(Locacion $locacion, $data)
     {
         return $this->locacionRepository->update($locacion, $data);
+    }
+
+    public function empleadosDeLocacion(Locacion $locacion)
+    {
+        return $this->locacionRepository->empleadosDeLocacion($locacion);
     }
 }

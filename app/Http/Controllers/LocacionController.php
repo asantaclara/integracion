@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Locacion;
 use App\Services\LocacionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class LocacionController extends Controller
@@ -21,7 +22,11 @@ class LocacionController extends Controller
      */
     public function index()
     {
-        return Locacion::all();
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Cliente','Administrador'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+        return $this->locacionService->all($user);
     }
 
     /**
@@ -30,6 +35,10 @@ class LocacionController extends Controller
      */
     public function create()
     {
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         return [
             'cliente_id',
             'direccion',
@@ -44,6 +53,14 @@ class LocacionController extends Controller
      */
     public function store(Request $request)
     {
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         $validator = Validator::make($request->all(), [
             'cliente_id' => 'required|exists:cliente,id',
             'direccion' => 'required',
@@ -69,6 +86,10 @@ class LocacionController extends Controller
      */
     public function show(Locacion $locacion)
     {
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         if($locacion) {
             return response()->json(['success' => 'success', 'cliente' => $locacion],200);
         } else {
@@ -83,6 +104,10 @@ class LocacionController extends Controller
      */
     public function edit(Locacion $locacion)
     {
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         return [
             'cliente_id',
             'direccion',
@@ -98,8 +123,12 @@ class LocacionController extends Controller
      */
     public function update(Request $request, Locacion $locacion)
     {
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
         $validator = Validator::make($request->all(), [
-            'cliente_id' => 'exists:cliente',
+            'cliente_id' => 'exists:cliente,id',
         ]);
 
         if($validator->fails()){
@@ -119,7 +148,6 @@ class LocacionController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Locacion  $locacion
-     * @return \Illuminate\Http\Response
      */
     public function destroy(Locacion $locacion)
     {

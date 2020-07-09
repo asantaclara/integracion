@@ -22,4 +22,9 @@ class Cliente extends Model
     {
         return $this->hasMany('App\Locacion','cliente_id');
     }
+
+    public function empleados()
+    {
+        return $this->hasMany('App\Empleado','cliente_id');
+    }
 }

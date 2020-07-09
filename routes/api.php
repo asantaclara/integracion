@@ -23,8 +23,10 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::resource('horario_laboral', 'HorarioLaboralController');
 
     Route::resource('empleado', 'EmpleadoController');
-    Route::post('asignar-locacion-a-empleado', 'EmpleadoController@asignarLocacionAEmpleado');
+    Route::get('empleado/locacion/{locacion}', 'EmpleadoController@empleadosDeLocacion');
+    Route::post('asignar-locacion-a-empleado', 'EmpleadoLocacionController@store');
     Route::post('asignar-horario-laboral-a-empleados', 'HorarioLaboralController@asignarHorarioLaboralAEmpleados');
+
 
     Route::get('cliente-test', 'ClienteController@test');
 });

@@ -18,9 +18,13 @@ class EmpleadoService
         $this->empleadoRepository = $empleadoRepository;
         $this->empleadoLocacionRepository = $empleadoLocacionRepository;
     }
-    public function all()
+    public function all($user)
     {
-        return $this->empleadoRepository->all();
+        $clienteId = null;
+        if($user->rol == 'Cliente') {
+            $clienteId = $user->cliente->id;
+        }
+        return $this->empleadoRepository->all($clienteId);
     }
 
     public function create($data)
@@ -33,16 +37,4 @@ class EmpleadoService
         return $this->empleadoRepository->update($empleado, $data);
     }
 
-    public function asignarLocacion($data)
-    {
-        $empleado = Empleado::where('id', $data['empleado_id'])->first();
-
-        $locacionesEmpleador = $empleado->cliente->locaciones;
-
-        if(count($locacionesEmpleador->where('id', $data['locacion_id'])) == 0) {
-            throw new Exception('La locacion no pertenece al empleador del empleado');
-        }
-
-        return $this->empleadoLocacionRepository->create($data);
-    }
 }

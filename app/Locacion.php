@@ -12,4 +12,19 @@ class Locacion extends Model
         'direccion',
         'descripcion'
     ];
+
+    public function empleados()
+    {
+        return $this->belongsToMany(
+            'App\Empleado',
+            'empleado_locacion',
+            'locacion_id',
+            'empleado_id'
+        );
+    }
+
+    public function cliente()
+    {
+        return $this->belongsTo('App\Cliente', 'cliente_id');
+    }
 }
