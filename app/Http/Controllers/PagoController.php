@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Pago;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class PagoController extends Controller
 {
@@ -31,11 +33,29 @@ class PagoController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        //
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'cliente_id' => 'required|exists:cliente,id',
+            'monto' => 'required|numeric',
+        ]);
+        if($validator->fails()){
+            return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
+        }
+        try {
+            $request = $request->all();
+            unset($request['api_token']);
+            unset($request['id']);
+            $cliente = $this->clienteService->create($request);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
+        }
+        return response()->json(['success' => 'success', 'cliente' => $cliente],200);
     }
 
     /**

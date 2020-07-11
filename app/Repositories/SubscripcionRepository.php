@@ -19,7 +19,7 @@ class SubscripcionRepository
 
     public function create($data)
     {
-        return Subscripcion::create([$data]);
+        return Subscripcion::create($data);
     }
 
     public function update(Subscripcion $subscripcion, $data)

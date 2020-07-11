@@ -25,6 +25,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::resource('empleado', 'EmpleadoController');
     Route::resource('servicio', 'ServicioController');
     Route::resource('subscripcion', 'SubscripcionController');
+    Route::resource('pago', 'pagoController');
 
 //    Empleados
     Route::get('empleado/locacion/{locacion}', 'EmpleadoController@empleadosDeLocacion');
