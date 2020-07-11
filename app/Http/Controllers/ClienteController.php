@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ClienteController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      *

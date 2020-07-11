@@ -3,10 +3,8 @@
 namespace App\Services;
 
 use App\Cliente;
-use App\Empleado;
 use App\Locacion;
 use App\Repositories\LocacionRepository;
-use Prophecy\Exception\Prophecy\MethodProphecyException;
 
 class LocacionService
 {
@@ -38,5 +36,10 @@ class LocacionService
     public function empleadosDeLocacion(Locacion $locacion)
     {
         return $this->locacionRepository->empleadosDeLocacion($locacion);
+    }
+
+    public function locacionesDeCliente(Cliente $cliente)
+    {
+        return $cliente->locaciones;
     }
 }

@@ -86,7 +86,6 @@ class EmpleadoController extends Controller
             $request = $request->all();
             unset($request['api_token']);
             unset($request['id']);
-            unset($request['cliente_id']);
             $request['cliente_id'] = $user->cliente->id;
             $empleado = $this->empleadoService->create($request);
         } catch (\Exception $e) {
@@ -193,19 +192,24 @@ class EmpleadoController extends Controller
     public function empleadosDeLocacion(Locacion $locacion)
     {
         $user = Auth::guard('api')->user();
-        if(!in_array($user->rol,['Cliente'])) {
+        if(!in_array($user->rol,['Cliente','Fichador'])) {
             return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
         }
-
         if($locacion->cliente != $user->cliente){
             return response()->json(['error' => 'Forbidden', 'message' => 'La locacion no pertenece al cliente'],401);
         }
-
-
         try {
             return $this->locacionService->empleadosDeLocacion($locacion);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
         }
+    }
+
+    public function empleadosDeFichador() {
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Fichador'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+        return $this->empleadosDeLocacion($user->locacion);
     }
 }

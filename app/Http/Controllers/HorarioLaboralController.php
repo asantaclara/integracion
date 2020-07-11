@@ -101,10 +101,13 @@ class HorarioLaboralController extends Controller
             return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
         }
         $clienteId = $user->cliente->id;
+        $locacionId = $request['locacion_id'];
         $validator = Validator::make($request->all(), [
             'locacion_id' => 'required|exists:locacion,id,cliente_id,'.$clienteId,
+            'periodo'   => 'required|numeric|between:1,7',
             'empleados_id'   => 'required|array',
-            //TODO seguir cargando las validaciones, faltan las horas y despues ver como se asignan los horarios.
+            'empleados_id.*' => 'exists:empleado_locacion,empleado_id,locacion_id,'.$locacionId,
+            'hasta' => 'date|required|nullable|after:desde',
         ]);
         if($validator->fails()){
             return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
@@ -112,7 +115,11 @@ class HorarioLaboralController extends Controller
         try {
             $request = $request->all();
             unset($request['api_token']);
-            $horarioLaboral = $this->horarioLaboralService->asignarHorariosLaborales($request);
+            if(count($request['horarios']) > 0) {
+                $horarioLaboral = $this->horarioLaboralService->asignarHorariosLaborales($request);
+            } else {
+                throw new \Exception('No se han seleccionado horarios');
+            }
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
         }

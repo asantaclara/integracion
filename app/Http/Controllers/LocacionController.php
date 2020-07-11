@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Cliente;
 use App\Locacion;
 use App\Services\LocacionService;
 use Illuminate\Http\Request;
@@ -152,5 +153,14 @@ class LocacionController extends Controller
     public function destroy(Locacion $locacion)
     {
         //
+    }
+
+    public function locacionesDeCliente(Cliente $cliente) {
+
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
+        return $this->locacionService->locacionesDeCliente($cliente);
     }
 }

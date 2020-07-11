@@ -28,7 +28,8 @@ class CreateUsersTable extends Migration
             $table->enum('rol', [
                 'Administrador',
                 'Cliente',
-                'Empleado'
+                'Empleado',
+                'Fichador'
             ]);
             $table->foreignId('cliente_id')->nullable()->default(null)->constrained('cliente');
             $table->foreignId('locacion_id')->nullable()->default(null)->constrained('locacion');

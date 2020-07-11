@@ -2,25 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ServicioService;
 use App\Servicio;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ServicioController extends Controller
 {
+    private $servicioService;
+
+    public function __construct(ServicioService $servicioService)
+    {
+        $this->servicioService = $servicioService;
+    }
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        //
+        return $this->servicioService->all();
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
      */
     public function create()
     {
