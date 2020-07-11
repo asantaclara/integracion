@@ -51,8 +51,8 @@ class EmpleadoLocacionController extends Controller
         $validator = Validator::make($request->all(), [
             'empleado_id' => 'required|exists:empleado,id,cliente_id,'.$user->cliente->id,
             'locacion_id' => 'required|exists:locacion,id,cliente_id,'.$user->cliente->id,
-            'fecha_vinculacion' => 'date',
-            'fecha_desvinculacion' => 'date|after_or_equal:fecha_vinculacion'
+            'fecha_vinculacion' => 'date|nullable',
+            'fecha_desvinculacion' => 'date|after_or_equal:fecha_vinculacion|nullable'
         ]);
         if($validator->fails()){
             return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
@@ -60,7 +60,7 @@ class EmpleadoLocacionController extends Controller
         try{
             $request = $request->all();
             unset($request['api_token']);
-            if(!isset($request['fecha_vinculacion'])) {
+            if(!isset($request['fecha_vinculacion']) || $request['fecha_vinculacion'] == '') {
                 $request['fecha_vinculacion'] = Carbon::now()->format('Y-m-d');
             }
             $empleadoLocacion = $this->empleadoLocacionService->asignarLocacion($request);

@@ -3,20 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Pago;
+use App\Services\PagoService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class PagoController extends Controller
 {
+    private $pagoService;
+
+    public function __construct(PagoService $pagoService)
+    {
+        $this->pagoService = $pagoService;
+    }
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        //
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Cliente','Administrador'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+        return $this->pagoService->all($user);
     }
 
     /**
@@ -42,7 +53,8 @@ class PagoController extends Controller
 
         $validator = Validator::make($request->all(), [
             'cliente_id' => 'required|exists:cliente,id',
-            'monto' => 'required|numeric',
+            'monto' => 'required|numeric|min:0',
+            'fecha' => 'required|date|before_or_equal:'.Carbon::now()->format('Y-m-d')
         ]);
         if($validator->fails()){
             return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
@@ -51,7 +63,7 @@ class PagoController extends Controller
             $request = $request->all();
             unset($request['api_token']);
             unset($request['id']);
-            $cliente = $this->clienteService->create($request);
+            $cliente = $this->pagoService->create($request);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
         }
