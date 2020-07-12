@@ -57,7 +57,7 @@ class SubscripcionController extends Controller
             'servicio_id' => 'required|exists:servicio,id',
             'cliente_id' => 'required|exists:cliente,id',
             'fecha_desde' => 'required|date|after_or_equal:'.Carbon::now()->format('Y-m-d'),
-            'fecha_hasta' => 'date|after_or_equal:fecha_desde',
+            'fecha_hasta' => 'date|after_or_equal:fecha_desde|nullable',
         ]);
         if($validator->fails()){
             return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
@@ -65,6 +65,9 @@ class SubscripcionController extends Controller
         try {
             $request = $request->all();
             unset($request['api_token']);
+            if($request['servicio_id'] == 2 && $request['fecha_hasta'] == ''){
+                throw new \Exception('Una subscripcion eventual debe tener una fecha de finalizacion');
+            }
             $subscripcion = $this->subscripcionService->create($request);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);

@@ -64,7 +64,7 @@ class FichadaRepository
             ->selectRaw('empleado_id, sum(minutos_trabajados) as minutos_trabajados')
             ->get();
 
-        $horariosLaborales = Horario_Laboral::join('empleado_locacion_horario_laboral as elhl', 'horario_laboral.id', 'elhl.horario_laboral_id' )
+        $horariosLaborales = Horario_Laboral::join('empleado_locacion_horario_laboral as elhl', 'horario_laboral.id', 'elhl.horario_laboral_id')
             ->join('empleado_locacion as el', 'el.id', 'elhl.empleado_locacion_id')
             ->where('horario_laboral.fecha_desde', '>=', $data['desde'])
             ->where('horario_laboral.fecha_hasta', '<=', $data['hasta'])
@@ -89,10 +89,11 @@ class FichadaRepository
         foreach ($horariosLaborales as $hl) {
             $empleado = [];
             $empleado['empleado_id'] = $hl->empleado_id;
-            $empleado['horas_a_trabajar'] = $horariosLaborales->where('empleado_id', $empleado['empleado_id'])->first()['minutos_a_trabajar']/60;
-            $empleado['dias_a_trabajar'] = $diasATrabajar->where('empleado_id', $empleado['empleado_id'])->first()->dias_a_trabajar;
-            $empleado['horas_trabajadas'] = $fichadas->where('empleado_id', $empleado['empleado_id'])->first()['minutos_trabajados']/60;
-            $empleado['dias_trabajados'] = $diasTrabajados->where('empleado_id', $empleado['empleado_id'])->first()->dias_trabajados;
+            $empleado['nombre'] = $user->cliente->empleados->where('id',$hl->empleado_id)->first()->nombre;
+            $empleado['horas_a_trabajar'] = $horariosLaborales ? $horariosLaborales->where('empleado_id', $empleado['empleado_id'])->first()['minutos_a_trabajar']/60 : 0;
+            $empleado['dias_a_trabajar'] = $diasATrabajar ? $diasATrabajar->where('empleado_id', $empleado['empleado_id'])->first()->dias_a_trabajar : 0;
+            $empleado['horas_trabajadas'] = count($fichadas) ? $fichadas->where('empleado_id', $empleado['empleado_id'])->first()['minutos_trabajados']/60 : 0;
+            $empleado['dias_trabajados'] = count($diasTrabajados) ? $diasTrabajados->where('empleado_id', $empleado['empleado_id'])->first()->dias_trabajados : 0;
             $empleado['ausencias'] = $empleado['dias_a_trabajar'] - $empleado['dias_trabajados'];
             $empleado['horas_extras'] = $empleado['horas_trabajadas'] - ($empleado['horas_a_trabajar'] / $empleado['dias_a_trabajar']) * $empleado['dias_trabajados'];
             array_push($result,$empleado);
