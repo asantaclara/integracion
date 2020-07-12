@@ -14,13 +14,14 @@ class HorarioLaboralRepository
 
     public function create($data)
     {
-        $horarioLaboral = new Horario_Laboral($data);
-        $horarioLaboral->save();
-        return $horarioLaboral;
+        $data['duracion_minutos'] = Carbon::parse($data['hora_hasta'])->diffInMinutes(Carbon::parse($data['hora_desde']));
+
+        return Horario_Laboral::create($data);
     }
 
     public function update(Horario_Laboral $horarioLaboral, $data)
     {
+        $data['duracion_minutos'] = Carbon::parse($data['hora_hasta'])->diffInMinutes(Carbon::parse($data['hora_desde']));
         $horarioLaboral->update($data);
         return $horarioLaboral;
     }
@@ -29,8 +30,8 @@ class HorarioLaboralRepository
     {
         $count = 0;
         foreach ($horas as $hora) {
-            $horas[$count][0] = Carbon::parse(substr($hora[0],0,24));
-            $horas[$count][1] = Carbon::parse(substr($hora[1],0,24));
+            $horas[$count][0] = Carbon::parse($hora[0])->setTimezone('America/Argentina/Buenos_Aires');
+            $horas[$count][1] = Carbon::parse($hora[1])->setTimezone('America/Argentina/Buenos_Aires');
             $count++;
         }
         $horariosCreados = collect();
@@ -42,7 +43,8 @@ class HorarioLaboralRepository
                 if($hora[1]->isBefore($fechaHasta)) {
                     $horarioLaboral = Horario_Laboral::create([
                         'fecha_desde' => $hora[0],
-                        'fecha_hasta' => $hora[1]
+                        'fecha_hasta' => $hora[1],
+                        'duracion_minutos' => Carbon::parse($hora[1])->diffInMinutes(Carbon::parse($hora[0]))
                     ]);
                     $horas[$count][0] = $horas[$count][0]->addDays($periodo);
                     $horas[$count][1] = $horas[$count][1]->addDays($periodo);

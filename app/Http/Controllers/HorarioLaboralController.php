@@ -107,7 +107,8 @@ class HorarioLaboralController extends Controller
             'periodo'   => 'required|numeric|between:1,7',
             'empleados_id'   => 'required|array',
             'empleados_id.*' => 'exists:empleado_locacion,empleado_id,locacion_id,'.$locacionId,
-            'hasta' => 'date|required|nullable|after:desde',
+            'hasta' => 'date|required|nullable|after_or_equal:desde',
+            'desde' => 'date',
         ]);
         if($validator->fails()){
             return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);

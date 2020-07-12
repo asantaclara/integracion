@@ -170,4 +170,32 @@ class FichadaController extends Controller
         }
         return response()->json(['success' => 'success', 'fichada' => $fichada],200);
     }
+
+    public function generarReporte(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Cliente'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+        $clienteId = $user->cliente->id;
+        $locacionId = $request['locacion_id'];
+        $validator = Validator::make($request->all(), [
+            'locacion_id' => 'required|exists:locacion,id,cliente_id,'.$clienteId,
+            'empleados_id'   => 'required|array',
+            'empleados_id.*' => 'exists:empleado_locacion,empleado_id,locacion_id,'.$locacionId,
+            'desde' => 'date|required|before_or_equal:desde',
+            'hasta' => 'date|required|after_or_equal:desde',
+        ]);
+        if($validator->fails()){
+            return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
+        }
+        try{
+            $request = $request->all();
+            unset($request['api_token']);
+            $reporte = $this->fichadaService->generarReporte($request);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
+        }
+        return response()->json(['success' => 'success', 'reporte' => $reporte],200);
+    }
 }

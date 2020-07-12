@@ -107,4 +107,9 @@ class FichadaService
         return $ultimaFichada;
     }
 
+    public function generarReporte($data)
+    {
+        return $this->fichadaRepository->generarReporte($data);
+    }
+
 }

@@ -51,7 +51,8 @@ class HorarioLaboralService
                 ->where('locacion_id', $data['locacion_id'])
                 ->get();
 
-            $hasta = Carbon::parse(($data['hasta']))->isAfter(Carbon::parse('2021-01-01')) ? Carbon::parse('2021-01-01') : Carbon::parse($data['hasta']);
+            $hasta = Carbon::parse(($data['hasta']))->isAfter(Carbon::parse('2021-01-01')) ?
+                Carbon::parse('2021-01-01')->startOfDay() : Carbon::parse($data['hasta'])->endOfDay();
 
             $horariosCreados = $this->horarioLaboralRepository->createHorarios($data['horarios'], $data['periodo'], $hasta);
 

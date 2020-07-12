@@ -26,6 +26,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::resource('servicio', 'ServicioController');
     Route::resource('subscripcion', 'SubscripcionController');
     Route::resource('pago', 'PagoController');
+    Route::resource('factura', 'FacturaController');
 
 //    Empleados
     Route::get('empleado/locacion/{locacion}', 'EmpleadoController@empleadosDeLocacion');
@@ -44,4 +45,6 @@ Route::group(['middleware' => ['auth:api']], function () {
 //    Fichada
     Route::post('fichada/cliente', 'FichadaController@fichadasDeCliente');
     Route::post('fichada-manual', 'FichadaController@fichadaManual');
+    Route::post('generar-reporte', 'FichadaController@generarReporte');
+
 });
