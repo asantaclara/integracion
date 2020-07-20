@@ -74,7 +74,7 @@ class LoginController extends Controller
         $user = Auth::guard('api')->user();
         if($user){
             $user->update([
-                'api_token' => null
+                'api_token' => Str::random(60)
             ]);
             return response()->json(['success' => 'success'],200);
         }
