@@ -73,7 +73,7 @@ class EmpleadoController extends Controller
             'nombre' => 'required',
             'legajo' => 'required',
             'tipo_documento' => 'required|in:CUIT,CDI,LE,LC,CI Extranjera,Dni,Pasaporte,CI Policia Federal,Certificado de Migracion',
-            'documento' => 'required|numeric|digits_between:7,8',
+            'documento' => 'required|numeric|digits_between:7,11',
             'direccion' => 'required',
             'telefono' => 'numeric|required',
             'nacionalidad' => 'required|in:Argentina,Bolivia,Brasil,Chile,Paraguay,Uruguay,Otra',
