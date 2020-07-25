@@ -100,6 +100,6 @@ class FichadaRepository
             $empleado['horas_extras'] = $empleado['horas_trabajadas'] - ($empleado['horas_a_trabajar'] / $empleado['dias_a_trabajar']) * $empleado['dias_trabajados'];
             array_push($result,$empleado);
         }
-        return [$result];
+        return $result;
     }
 }

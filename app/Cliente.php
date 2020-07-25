@@ -28,4 +28,9 @@ class Cliente extends Model
     {
         return $this->hasMany('App\Empleado','cliente_id');
     }
+
+    public function user()
+    {
+        return $this->hasOne('App\User', 'cliente_id');
+    }
 }
