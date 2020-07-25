@@ -38,7 +38,7 @@ class HorarioLaboralService
     public function asignarHorariosLaborales($data)
     {
         return DB::transaction(function () use ($data) {
-
+            $data['hasta'] = $data['hasta'] ?? Carbon::parse('2021-01-01')->startOfDay();
             $primerHorario = $data['horarios'][0];
             $ultimoHorario = $data['horarios'][sizeof($data['horarios']) - 1];
 

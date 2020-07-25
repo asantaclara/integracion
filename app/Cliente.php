@@ -14,6 +14,7 @@ class Cliente extends Model
         'forma_pago_habitual',
         'direccion',
         'nombre_razon_social',
+        'cuenta_bancaria',
         'email',
         'telefono'
     ];
