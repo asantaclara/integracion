@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Cliente;
+use App\User;
+use Couchbase\UserSettings;
 
 class ClienteRepository
 {
@@ -22,5 +24,17 @@ class ClienteRepository
     {
         $cliente->update($data);
         return $cliente;
+    }
+
+    public function destroy(Cliente $cliente)
+    {
+        $users = User::where('cliente_id', $cliente->id)->get();
+
+        foreach ($users as $u) {
+            $u->activo = 0;
+            $u->save();
+        }
+
+        return count($users) > 0;
     }
 }

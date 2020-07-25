@@ -167,10 +167,17 @@ class ClienteController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Cliente  $cliente
-     * @return \Illuminate\Http\Response
      */
     public function destroy(Cliente $cliente)
     {
-        //
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+        try{
+          $cliente = $this->clienteService->destroy($cliente);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
+        }
+        return response()->json(['success' => 'success', 'cliente' => $cliente],200);
     }
 }

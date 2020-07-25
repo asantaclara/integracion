@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Cliente;
 use App\Subscripcion;
+use Carbon\Carbon;
 
 class SubscripcionRepository
 {
@@ -35,6 +36,13 @@ class SubscripcionRepository
     public function subscripcionesDeCliente(Cliente $cliente)
     {
         return Subscripcion::whereIn('locacion_id', $cliente->locaciones->pluck('id'))->with('servicio')->get();
+    }
+
+    public function destroy(Subscripcion $subscripcion)
+    {
+        $subscripcion->fecha_hasta = Carbon::now();
+        $subscripcion->save();
+        return $subscripcion;
     }
 
 }

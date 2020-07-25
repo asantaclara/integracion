@@ -32,12 +32,15 @@ class SubscripcionService
     public function create($data)
     {
         return DB::transaction(function () use ($data) {
+            $fechaHastaFija = true;
+
             if ((isset($data['fecha_hasta']) && $data['fecha_hasta'] == '') || !isset($data['fecha_hasta'])) {
+                $fechaHastaFija = false;
                 $subscripcion = Subscripcion::where('servicio_id', $data['servicio_id'])
                     ->where('locacion_id', $data['locacion_id'])
                     ->orderByDesc('fecha_desde')->first();
 
-                if (!$subscripcion->fecha_hasta) {
+                if ($subscripcion && !$subscripcion->fecha_hasta) {
                     throw new Exception('Ya tiene un subscripcion activa para esa locacion');
                 } else {
                     $subscripcion = null;
@@ -58,8 +61,8 @@ class SubscripcionService
                     ->first();
             }
 
-            if (Carbon::parse($data['fecha_desde'])->diffInDays(Carbon::parse($data['fecha_hasta'])) <= Carbon::parse($data['fecha_desde'])->daysInMonth && $data['servicio_id'] == 1) {
-                throw new \Exception('El periodo de tiempo solicitado es incompatible con un servicio mensual');
+            if ($fechaHastaFija && $data['servicio_id'] == 1 && Carbon::parse($data['fecha_desde'])->diffInDays(Carbon::parse($data['fecha_hasta'])) <= Carbon::parse($data['fecha_desde'])->daysInMonth) {
+                throw new Exception('El periodo de tiempo solicitado es incompatible con un servicio mensual');
             }
             if ($subscripcion) {
                 throw new Exception('Ya tiene una subscripcion activa para esa locacion y fecha.');
@@ -81,5 +84,10 @@ class SubscripcionService
     public function subscripcionesDeCliente(Cliente $cliente)
     {
         return $this->subscripcionRepository->subscripcionesDeCliente($cliente);
+    }
+
+    public function destroy(Subscripcion $subscripcion)
+    {
+        return $this->subscripcionRepository->destroy($subscripcion);
     }
 }

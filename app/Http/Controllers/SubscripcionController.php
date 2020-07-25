@@ -113,11 +113,21 @@ class SubscripcionController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Subscripcion  $subscripcion
-     * @return \Illuminate\Http\Response
      */
     public function destroy(Subscripcion $subscripcion)
     {
-        //
+        if(Auth::guard('api')->user()->rol != 'Administrador') {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+        try {
+            if($subscripcion->fecha_hasta) {
+                return response()->json(['error' => 'Forbidden', 'message' => 'La subscripcion no es indefinida'],406);
+            }
+            $subscripcion = $this->subscripcionService->destroy($subscripcion);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
+        }
+        return response()->json(['success' => 'success', 'subscripcion' => $subscripcion],200);
     }
 
     public function subscripcionesDeCliente(Cliente $cliente) {

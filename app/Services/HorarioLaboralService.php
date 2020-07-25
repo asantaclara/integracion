@@ -64,7 +64,13 @@ class HorarioLaboralService
 
     public function horarioLaboralDeEmpleado($data)
     {
-        return $this->horarioLaboralRepository->horarioLaboralDeEmpleado($data);
+        $horarios = $this->horarioLaboralRepository->horarioLaboralDeEmpleado($data);
+        $aux = [];
+        foreach ($horarios as $h) {
+            $aux2 = [$h->fecha_desde, $h->fecha_hasta];
+            array_push($aux, $aux2);
+        }
+        return $aux;
     }
 
 }

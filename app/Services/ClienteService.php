@@ -27,4 +27,9 @@ class ClienteService
     {
         return $this->clienteRepository->update($cliente, $data);
     }
+
+    public function destroy(Cliente $cliente)
+    {
+        return $this->clienteRepository->destroy($cliente);
+    }
 }

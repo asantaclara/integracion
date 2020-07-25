@@ -145,7 +145,7 @@ class HorarioLaboralController extends Controller
         try {
             $request = $request->all();
             unset($request['api_token']);
-            $horarios = $this->horarioLaboralService->horarioLaboralDeEmpleado($request->all());
+            $horarios = $this->horarioLaboralService->horarioLaboralDeEmpleado($request);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
         }
