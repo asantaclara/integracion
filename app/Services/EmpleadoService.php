@@ -37,4 +37,9 @@ class EmpleadoService
         return $this->empleadoRepository->update($empleado, $data);
     }
 
+    public function desvincular(Empleado $empleado)
+    {
+        return $this->empleadoLocacionRepository->desvincular($empleado);
+    }
+
 }

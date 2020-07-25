@@ -182,11 +182,24 @@ class EmpleadoController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Empleado  $empleado
-     * @return \Illuminate\Http\Response
      */
     public function destroy(Empleado $empleado)
     {
-        //
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Cliente'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+
+        if($empleado->cliente_id != $user->cliente->id) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'El empleado no pertenece al cliente'],401);
+        }
+
+        try{
+            $empleado = $this->empleadoService->desvincular($empleado);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
+        }
+        return response()->json(['success' => 'success', 'empleado' => $empleado],200);
     }
 
     public function empleadosDeLocacion(Locacion $locacion)
