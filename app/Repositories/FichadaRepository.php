@@ -50,10 +50,12 @@ class FichadaRepository
             ->get();
     }
 
-    public function generarReporte($data)
+    public function generarReporte($data, $user = null)
     {
         // desde, hasta, array de empleados y locacion_id
-        $user = Auth::guard('api')->user();
+        if(!$user) {
+            $user = Auth::guard('api')->user();
+        }
 
         $fichadas = Fichada::where('fecha_hora_entrada', '>=', $data['desde'])
             ->where('fecha_hora_salida', '<=', $data['hasta'])

@@ -112,4 +112,14 @@ class FichadaService
         return $this->fichadaRepository->generarReporte($data);
     }
 
+    public function generarReporteParaLiquidador($data)
+    {
+//        'locacion_id' => 'required|exists:locacion,id,cliente_id,'.$clienteId,
+//            'empleados_id'   => 'required|array',
+//            'empleados_id.*' => 'exists:empleado_locacion,empleado_id,locacion_id,'.$locacionId,
+//            'desde' => 'date|required|before_or_equal:desde',
+//            'hasta' => 'date|required|after_or_equal:desde',
+
+    }
+
 }

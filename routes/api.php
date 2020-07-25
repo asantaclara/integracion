@@ -49,5 +49,6 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::post('fichada/cliente', 'FichadaController@fichadasDeCliente');
     Route::post('fichada-manual', 'FichadaController@fichadaManual');
     Route::post('generar-reporte', 'FichadaController@generarReporte');
+    Route::get('reporte-de-cliente', 'FichadaController@generarReporteDeCliente');
 
 });

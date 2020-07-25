@@ -64,11 +64,11 @@ class FacturaController extends Controller
         try {
             $request = $request->all();
             unset($request['api_token']);
-            $cliente = $this->facturaService->create($request);
+            $factura = $this->facturaService->create($request);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
         }
-        return response()->json(['success' => 'success', 'cliente' => $cliente],200);
+        return response()->json(['success' => 'success', 'factura' => $factura, 'cliente' => Auth::user()->cliente],200);
     }
 
     /**

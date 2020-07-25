@@ -56,6 +56,7 @@ class FacturaService
                 $cargo->save();
             }
 
+
             return $factura;
         });
     }
