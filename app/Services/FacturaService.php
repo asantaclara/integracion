@@ -34,7 +34,7 @@ class FacturaService
                 ->join('locacion as l', 'l.id', 's.locacion_id')
                 ->where('cliente_id', $data['cliente_id'])
                 ->whereNull('cargo.factura_id')
-                ->where('cargo.created_at', '<=', Carbon::parse($data['fecha_hasta']))
+                ->where('cargo.created_at', '<=', $data['fecha_hasta'])
                 ->select('cargo.*')
                 ->get();
 
