@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Cliente;
 use App\Factura;
 use App\Fichada;
 use App\Services\FacturaService;
@@ -68,7 +69,7 @@ class FacturaController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
         }
-        return response()->json(['success' => 'success', 'factura' => $factura, 'cliente' => Auth::user()->cliente],200);
+        return response()->json(['success' => 'success', 'factura' => $factura, 'cliente' => Cliente::find($request['cliente_id'])],200);
     }
 
     /**
