@@ -61,4 +61,10 @@ class HorarioLaboralService
             return $result;
         });
     }
+
+    public function horarioLaboralDeEmpleado($data)
+    {
+        return $this->horarioLaboralRepository->horarioLaboralDeEmpleado($data);
+    }
+
 }

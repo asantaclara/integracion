@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Empleado_Locacion;
 use App\Horario_Laboral;
 use Carbon\Carbon;
 
@@ -57,5 +58,14 @@ class HorarioLaboralRepository
             }
         }
         return $horariosCreados;
+    }
+
+    public function horarioLaboralDeEmpleado($data)
+    {
+        return Empleado_Locacion::join('empleado_locacion_horario_labora as elhl', 'elhl.empleado_locacion_id', 'empleado_locacion.id')
+            ->join('horario_laboral as hl', 'hl.id', 'elhl.horario_laboral_id')
+            ->where('empleado_locacion.empleado_id', $data['empleado_id'])
+            ->where('empleado_locacion.locacion_id', $data['locacion_id'])
+            ->get();
     }
 }

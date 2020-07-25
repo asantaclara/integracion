@@ -126,4 +126,29 @@ class HorarioLaboralController extends Controller
         }
         return response()->json(['success' => 'success', 'horarioLaboral' => $horarioLaboral],200);
     }
+
+    public function horarioLaboralDeEmpleado(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+        if(!in_array($user->rol,['Cliente'])) {
+            return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos'],401);
+        }
+        $clienteId = $user->cliente->id;
+        $locacionId = $request['locacion_id'];
+        $validator = Validator::make($request->all(), [
+            'locacion_id' => 'required|exists:locacion,id,cliente_id,'.$clienteId,
+            'empleado_id' => 'required|exists:empleado_locacion,empleado_id,locacion_id,'.$locacionId,
+        ]);
+        if($validator->fails()){
+            return response()->json(['error' => 'Forbidden', 'errors' => $validator->errors()],406);
+        }
+        try {
+            $request = $request->all();
+            unset($request['api_token']);
+            $horarios = $this->horarioLaboralService->horarioLaboralDeEmpleado($request->all());
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Forbidden', 'message' => $e->getMessage()],406);
+        }
+        return response()->json(['success' => 'success', 'horarios_laborales' => $horarios],200);
+    }
 }
