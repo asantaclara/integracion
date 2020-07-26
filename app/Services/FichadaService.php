@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\Empleado;
 use App\Empleado_Locacion;
+use App\Feriado;
 use App\Fichada;
 use App\Repositories\FichadaRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class FichadaService
 {
@@ -131,6 +134,34 @@ class FichadaService
         }
 
         return $reportes;
+    }
+
+    public function crearFeriados($data)
+    {
+        return DB::transaction(function () use ($data) {
+            $desde = Carbon::parse($data['fecha_desde'])->startOfDay();
+            $hasta = Carbon::parse($data['fecha_hasta'])->endOfDay();
+            while ($desde->isBefore($hasta)) {
+                foreach ($data['empleados_id'] as $e) {
+                    $dobleCarga = Feriado::where('locacion_id', $data['locacion_id'])
+                        ->where('empleado_id', $e)
+                        ->where('fecha', $desde)
+                        ->count();
+                    if($dobleCarga > 0){
+                        $emp = Empleado::find($e);
+                        throw new \Exception('El empleado '.$emp->nombre.' ya tiene una carga el '.$desde->format('Y-m-d'));
+                    }
+                    Feriado::create([
+                        'fecha' => $desde,
+                        'descripcion' => $data['descripcion'],
+                        'empleado_id' => $e,
+                        'locacion_id' => $data['locacion_id']
+                    ]);
+                }
+                $desde->addDay();
+            }
+            return true;
+        });
     }
 
 }

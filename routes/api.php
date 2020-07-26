@@ -27,6 +27,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::resource('subscripcion', 'SubscripcionController');
     Route::resource('pago', 'PagoController');
     Route::resource('factura', 'FacturaController');
+    Route::resource('feriado', 'FeriadoController');
 
 //    Horario Laboral
     Route::get('horario-laboral-empleado-locacion', 'HorarioLaboralController@horarioLaboralDeEmpleado');
