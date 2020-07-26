@@ -217,7 +217,6 @@ class FichadaController extends Controller
         }
         try{
             $cliente = Cliente::where('cuit_cuil', $request['cuit_cliente'])->first();
-
             if(!count(DB::select('select * from liquidador_cliente where liquidador_user_id = '.$user->id.' and cliente_id = '.$cliente->id))) {
                 return response()->json(['error' => 'Forbidden', 'message' => 'No tiene permisos para liquidar a ese cliente'],406);
             }

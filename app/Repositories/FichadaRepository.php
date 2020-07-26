@@ -3,9 +3,11 @@
 namespace App\Repositories;
 
 
+use App\Empleado;
 use App\Feriado;
 use App\Fichada;
 use App\Horario_Laboral;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -52,6 +54,9 @@ class FichadaRepository
 
     public function generarReporte($data, $user = null)
     {
+        $data['desde'] = Carbon::parse($data['desde'])->startOfDay();
+        $data['hasta'] = Carbon::parse($data['hasta'])->endOfDay();
+
         // desde, hasta, array de empleados y locacion_id
         if(!$user) {
             $user = Auth::guard('api')->user();
@@ -89,15 +94,28 @@ class FichadaRepository
 
         $result = [];
         foreach ($horariosLaborales as $hl) {
+            $emp = Empleado::find($hl->empleado_id);
+            $diasNoTrabajo = collect(DB::select("select descripcion, count(*) as cant from feriado where empleado_id = ".$emp->id."
+                                and fecha <= '".$data['hasta']."' and fecha >= '".$data['desde']."' and locacion_id = ".$data['locacion_id']." group by descripcion"));
+
             $empleado = [];
             $empleado['empleado_id'] = $hl->empleado_id;
+            $empleado['cuit'] = $emp->documento;
+            $empleado['feriados'] = count($diasNoTrabajo->where('descripcion','Feriado')) > 0 ? $diasNoTrabajo->where('descripcion','Feriado')->first()->cant : 0;
+            $empleado['diasVacaciones'] = count($diasNoTrabajo->where('descripcion','Vacaciones')) > 0 ? $diasNoTrabajo->where('descripcion','Vacaciones')->first()->cant : 0;
+            $empleado['diasEnfermedad'] = count($diasNoTrabajo->where('descripcion','Enfermedad')) > 0 ? $diasNoTrabajo->where('descripcion','Enfermedad')->first()->cant : 0;
+            $empleado['cuit'] = $emp->documento;
             $empleado['nombre'] = $user->cliente->empleados->where('id',$hl->empleado_id)->first()->nombre;
             $empleado['horas_a_trabajar'] = $horariosLaborales ? $horariosLaborales->where('empleado_id', $empleado['empleado_id'])->first()['minutos_a_trabajar']/60 : 0;
             $empleado['dias_a_trabajar'] = $diasATrabajar ? $diasATrabajar->where('empleado_id', $empleado['empleado_id'])->first()->dias_a_trabajar : 0;
-            $empleado['horas_trabajadas'] = count($fichadas) ? $fichadas->where('empleado_id', $empleado['empleado_id'])->first()['minutos_trabajados']/60 : 0;
-            $empleado['dias_trabajados'] = count($diasTrabajados) ? $diasTrabajados->where('empleado_id', $empleado['empleado_id'])->first()->dias_trabajados : 0;
+            $empleado['horas_trabajadas'] = count($fichadas->where('empleado_id', $empleado['empleado_id']))  ? floor($fichadas->where('empleado_id', $empleado['empleado_id'])->first()['minutos_trabajados']/60) : 0;
+            $empleado['dias_trabajados'] = count($diasTrabajados->where('empleado_id', $empleado['empleado_id'])) ? $diasTrabajados->where('empleado_id', $empleado['empleado_id'])->first()->dias_trabajados : 0;
             $empleado['ausencias'] = $empleado['dias_a_trabajar'] - $empleado['dias_trabajados'];
-            $empleado['horas_extras'] = $empleado['horas_trabajadas'] - ($empleado['horas_a_trabajar'] / $empleado['dias_a_trabajar']) * $empleado['dias_trabajados'];
+            if($empleado['horas_trabajadas'] - ($empleado['horas_a_trabajar'] / $empleado['dias_a_trabajar']) * $empleado['dias_trabajados'] < 0) {
+                $empleado['horas_extras'] = 0;
+            } else {
+                $empleado['horas_extras'] = floor($empleado['horas_trabajadas'] - ($empleado['horas_a_trabajar'] / $empleado['dias_a_trabajar']) * $empleado['dias_trabajados']);
+            }
             array_push($result,$empleado);
         }
         return $result;
