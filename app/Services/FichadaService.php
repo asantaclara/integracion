@@ -105,6 +105,9 @@ class FichadaService
             throw new \Exception('Existe una fichada el '.$fichada->fecha_hora_entrada.' que hace incompatible el pedido');
         }
 
+        /////
+        $data['minutos_trabajados'] = Carbon::parse($data['fecha_hora_salida'])->diffInMinutes(Carbon::parse($data['fecha_hora_entrada']));
+        /////
         $ultimaFichada = $this->fichadaRepository->create($data);
 
         return $ultimaFichada;
