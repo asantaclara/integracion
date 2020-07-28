@@ -36,7 +36,8 @@ class FichadaRepository
     {
         $user = Auth::guard('api')->user();
 
-        $fichadas = Fichada::select('*');
+        $fichadas = Fichada::join('empleado', 'fichada.empleado_id', 'empleado.id')
+            ->select('fichada.*', 'empleado.nombre', 'empleado.documento', 'empleado.tipo_documento');
 
         if(isset($data['empleado_id']) && $data['empleado_id'] != '') {
             $fichadas->where('empleado_id', $data['empleado_id']);
